@@ -1,0 +1,29 @@
+/* Dark mode: remaps the app's hard-coded colours when <html class="dark"> */
+.dark{color-scheme:dark}
+.dark .bg-\[\#F3EEE8\]{background-color:#0F1A15}
+.dark .bg-\[\#FDFBF6\]{background-color:#1C2B24}
+.dark .bg-\[\#E4EFE8\]{background-color:#1F3A2E}
+.dark .bg-\[\#E4DED4\]{background-color:#2C3B33}
+.dark .bg-white{background-color:#17241E}
+.dark .bg-white\/90{background-color:rgba(23,36,30,.9)}
+.dark .bg-red-50{background-color:#3A1D1D}
+.dark .text-red-700{color:#F2A0A0}
+.dark .text-red-600{color:#F28B8B}
+.dark .hover\:bg-white:hover{background-color:#1F2F27}
+.dark .hover\:bg-\[\#F3EEE8\]:hover{background-color:#1F2F27}
+.dark .hover\:bg-\[\#E9E2D6\]:hover{background-color:#26372F}
+.dark .text-\[\#17352B\]{color:#E8F0EB}
+.dark .text-\[\#3D4A44\]{color:#C5D0CA}
+.dark .text-\[\#6B6B62\]{color:#9AA79F}
+.dark .text-\[\#8A8A80\]{color:#8A968F}
+.dark .text-\[\#9A9A90\]{color:#8A968F}
+.dark .text-\[\#3D5A4D\]{color:#BFD8CA}
+.dark .text-\[\#256B4F\]{color:#4FBF8F}
+.dark .hover\:text-\[\#17352B\]:hover{color:#E8F0EB}
+.dark .border-\[\#E4DED4\]{border-color:#2C3B33}
+.dark .border-\[\#EFEAE0\]{border-color:#2C3B33}
+.dark .divide-\[\#EFEAE0\]>:not([hidden])~:not([hidden]){border-color:#2C3B33}
+.dark .from-\[\#CFE3D8\]{--tw-gradient-from:#1F3A2E var(--tw-gradient-from-position,);--tw-gradient-to:rgb(31 58 46 / 0) var(--tw-gradient-to-position,);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}
+.dark .to-\[\#E9DFCF\]{--tw-gradient-to:#2A2A22 var(--tw-gradient-to-position,)}
+.dark ::placeholder{color:#7C8A82}
+.dark dl>div{border-color:#2C3B33}
