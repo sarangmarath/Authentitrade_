@@ -1,0 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap');
+/* AuthenticTrade theme: display font + complete dark mode. Loaded after dark.css, so it wins. */
+.font-display{font-family:'Fraunces',Georgia,'Times New Roman',serif;letter-spacing:-0.015em}
+html{-webkit-font-smoothing:antialiased}
+.dark{color-scheme:dark}
+.dark body{background:#0C1411;color:#E8EFEA}
+.dark .bg-white{background-color:#131F1A !important}
+.dark .bg-\[\#F3EEE8\]{background-color:#0C1411 !important}
+.dark .bg-\[\#F6F3EE\]{background-color:#0C1411 !important}
+.dark .bg-\[\#FDFBF6\]{background-color:#0E1814 !important}
+.dark .bg-\[\#EFEAE3\]{background-color:#1A2A23 !important}
+.dark .bg-\[\#EEF5F0\]{background-color:#142720 !important}
+.dark .bg-\[\#E4EFE8\]{background-color:#1B2E25 !important}
+.dark .bg-\[\#E4DED4\]{background-color:#263830 !important}
+.dark .bg-\[\#17352B\]{background-color:#0B1F18 !important}
+.dark .bg-\[\#0F4D3A\]{background-color:#1F6B50 !important}
+.dark .bg-\[\#0F5B43\]{background-color:#1F7A58 !important}
+.dark .bg-red-50{background-color:#3A1B1B !important}
+.dark .bg-amber-50{background-color:#3A2F14 !important}
+.dark .bg-white\/90{background-color:rgba(19,31,26,.9) !important}
+.dark .bg-white\/95{background-color:rgba(19,31,26,.92) !important}
+.dark .border-\[\#E4DED4\]{border-color:#263830 !important}
+.dark .border-amber-200{border-color:#5B4A1F !important}
+.dark .text-\[\#17352B\]{color:#E8EFEA !important}
+.dark .text-\[\#3D4A44\]{color:#C5D2CA !important}
+.dark .text-\[\#6B6B62\]{color:#9DB0A5 !important}
+.dark .text-\[\#8A8A80\]{color:#7F9388 !important}
+.dark .text-\[\#9A9A90\]{color:#7F9388 !important}
+.dark .text-\[\#3D5A4D\]{color:#A9C9B8 !important}
+.dark .text-\[\#256B4F\]{color:#4CC38A !important}
+.dark .text-\[\#0F5B43\]{color:#6EE0A6 !important}
+.dark .text-red-700{color:#FCA5A5 !important}
+.dark .text-red-600{color:#FCA5A5 !important}
+.dark .text-amber-800{color:#FCD34D !important}
+.dark .text-amber-900{color:#FDE68A !important}
+.dark .from-\[\#CFE3D8\]{background-image:none !important;background-color:#1B2E25 !important}
+.dark .border-\[\#EFEAE0\]{border-color:#223229 !important}
+.dark .hover\:bg-\[\#F3EEE8\]:hover{background-color:#1A2A23 !important}
+.dark .hover\:bg-white:hover{background-color:#1A2A23 !important}
+.dark .hover\:bg-\[\#E9E2D6\]:hover{background-color:#223229 !important}
+.dark .hover\:text-\[\#17352B\]:hover{color:#fff !important}
+.dark .divide-\[\#EFEAE0\]>:not([hidden])~:not([hidden]){border-color:#223229 !important}
+.dark input,.dark select,.dark textarea{color:#E8EFEA;border-color:#2F443A}
+.dark input::placeholder,.dark textarea::placeholder{color:#7F9388 !important}
+.dark .shadow-xl,.dark .shadow-md{--tw-shadow-color:rgba(0,0,0,.6)}
+.dark img{filter:brightness(.92)}
+.dark .hero-keep,.dark .hero-keep *{color:inherit}
