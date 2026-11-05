@@ -1400,13 +1400,14 @@ import Chat, { Inbox } from './Chat'
 import PostPage from './Post'
 import Profile from './Profile'
 import Admin from './Admin'
-import { PayBox, Orders, useTier } from './Pay'
+import { PayBox, useTier } from './Pay'
+import { Orders } from './Orders'
 import Checkout from './Checkout'
 import { FilterBar } from './Browse'
 import { TAXONOMY, DEFAULT_FILTERS, applyFilters, emptyText, getDetail } from './Taxonomy'
 import './dark.css'
-import './theme.css'
-import { Search, Car, Gem, Smartphone, Sofa, Blocks, Trophy, Briefcase, Stamp, ShieldCheck, Lock, Handshake, Headset, Heart, MapPin, Clock, Flame, Moon, Sun, ChevronDown, LayoutGrid, ArrowRight, ExternalLink } from 'lucide-react'
+import './Theme.css'
+import { Search, Car, Gem, Smartphone, Sofa, Blocks, Trophy, Briefcase, Stamp, ShieldCheck, Lock, Handshake, Headset, Heart, BadgeIndianRupee, X, MapPin, Clock, Flame, Moon, Sun, ChevronDown, LayoutGrid, ArrowRight, ExternalLink } from 'lucide-react'
 
 const CURRENCY = 'INR'
 // Address of the separate "new products" website. Leave empty until it is live.
@@ -1674,7 +1675,9 @@ export default function Home({ session, profile, onLogin, onSignup, onLogout }) 
   const [posting, setPosting] = useState(false)
   const [chat, setChat] = useState(null)
   const [inbox, setInbox] = useState(false)
-  const [orders, setOrders] = useState(false)
+  const [orders, setOrders] = useState(false) // false | 'bought' | 'sold'
+  const [newSales, setNewSales] = useState([])  // payments received that the seller has not opened yet
+  const [toastOff, setToastOff] = useState(false)
   const [checkoutId, setCheckoutId] = useState(null)
   const [showProfile, setShowProfile] = useState(false)
   const [showAdmin, setShowAdmin] = useState(false)
@@ -1729,6 +1732,17 @@ export default function Home({ session, profile, onLogin, onSignup, onLogout }) 
     if (!session) { setIsAdmin(false); setShowAdmin(false); return }
     supabase.rpc('is_admin').then(({ data }) => setIsAdmin(data === true))
   }, [session])
+
+  // Seller side: check every 30 s for new payments on my listings
+  const loadNewSales = () => session && supabase.rpc('unseen_sales').then(({ data, error }) => { if (!error) setNewSales(data || []) })
+  useEffect(() => {
+    if (!session) { setNewSales([]); return }
+    loadNewSales()
+    const t = setInterval(loadNewSales, 30000)
+    return () => clearInterval(t)
+  }, [session])
+  const latestSale = newSales[0]
+  useEffect(() => { setToastOff(false) }, [latestSale?.id])
 
   const real = items && items.length > 0
   const base = useMemo(() => (real ? items : SAMPLES), [real, items])
@@ -1807,7 +1821,10 @@ export default function Home({ session, profile, onLogin, onSignup, onLogout }) 
               <>
                 {isAdmin && <button onClick={() => setShowAdmin(true)} className="font-semibold text-[#C2643C] hover:underline">Admin</button>}
                 <button onClick={() => setInbox(true)} className="font-medium hover:underline">Chats</button>
-                <button onClick={() => setOrders(true)} className="font-medium hover:underline">Orders</button>
+                <button onClick={() => setOrders(newSales.length ? 'sold' : 'bought')} className="relative font-medium hover:underline">
+                  Orders
+                  {newSales.length > 0 && <span title={`${newSales.length} new payment${newSales.length > 1 ? 's' : ''} received`} className="absolute -right-3.5 -top-2 grid h-4 min-w-4 place-items-center rounded-full bg-[#C2643C] px-1 text-[10px] font-bold text-white">{newSales.length}</span>}
+                </button>
                 <button onClick={() => { loadProfile(); setShowProfile(true) }} title="Profile"
                   className="grid h-9 w-9 place-items-center rounded-full bg-[#0F5B43] text-sm font-semibold text-white">{(who?.full_name || 'U')[0].toUpperCase()}</button>
                 <button onClick={onLogout} className="font-medium text-[#256B4F] hover:underline">Log out</button>
@@ -1904,11 +1921,25 @@ export default function Home({ session, profile, onLogin, onSignup, onLogout }) 
       </>)}
 
       {selected && <Detail key={selected.id} item={selected} onBack={close} session={session} onLogin={onLogin} onChat={setChat} onCheckout={(it) => { setCheckoutId(it.id); window.scrollTo(0, 0) }} badge={badges[selected.seller_id]} />}
-      {checkoutItem && <Checkout key={checkoutItem.id} item={checkoutItem} gallery={galleryFor(checkoutItem)} onBack={() => setCheckoutId(null)} onOrders={() => { setCheckoutId(null); setOrders(true) }} />}
+      {checkoutItem && <Checkout key={checkoutItem.id} item={checkoutItem} gallery={galleryFor(checkoutItem)} onBack={() => { setCheckoutId(null); loadItems() }} onOrders={() => { setCheckoutId(null); loadItems(); setOrders('bought') }} />}
 
       {posting && session && <PostPage userId={session.user.id} onExit={() => setPosting(false)} />}
 
-      {orders && session && <Orders me={session.user.id} onClose={() => setOrders(false)} />}
+      {orders && session && <Orders initialTab={orders} onClose={() => { setOrders(false); loadNewSales() }} onSeen={() => setNewSales([])} />}
+
+      {latestSale && !toastOff && !orders && (
+        <div role="status" className="fade-up fixed bottom-4 right-4 z-50 w-[min(22rem,calc(100vw-2rem))] rounded-2xl border border-[#E4DED4] bg-white p-4 shadow-xl">
+          <div className="flex items-start gap-3">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#E4EFE8] text-[#256B4F]"><BadgeIndianRupee size={18} strokeWidth={1.75} /></span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-[#17352B]">Payment received{newSales.length > 1 ? ` (${newSales.length} new)` : ''}</p>
+              <p className="mt-0.5 text-xs text-[#3D4A44]">{latestSale.buyer_name || 'A buyer'} paid <b>₹{Number(latestSale.amount).toLocaleString('en-IN')}</b> for {latestSale.listing_title || 'your listing'}. It is held safely in escrow.</p>
+              <button onClick={() => setOrders('sold')} className="mt-2 text-xs font-semibold text-[#256B4F] hover:underline">View sale</button>
+            </div>
+            <button onClick={() => setToastOff(true)} aria-label="Dismiss" className="text-[#8A8A80] hover:text-[#17352B]"><X size={16} /></button>
+          </div>
+        </div>
+      )}
       {inbox && session && <Inbox me={session.user.id} onClose={() => setInbox(false)} onPick={(c) => { setInbox(false); setChat(c) }} />}
       {chat && session && <Chat conversationId={chat.id} title={chat.title} me={session.user.id} onClose={() => setChat(null)} />}
     </div>

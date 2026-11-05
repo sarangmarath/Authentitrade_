@@ -548,7 +548,7 @@ export function PayBox({ item, session, isSample, onLogin, tier, onCheckout }) {
   return (
     <>
       <button onClick={start} className="mt-5 w-full rounded-xl bg-[#256B4F] py-3 text-sm font-semibold text-white transition hover:bg-[#1E5A42]">
-        Pay online with escrow (test mode)
+        Pay online with escrow 
       </button>
       {tier === 'both' && (
         <p className="mt-2 text-xs text-[#6B6B62]">Or chat with the seller to arrange a direct deal. Direct deals are not covered by escrow.</p>
@@ -637,7 +637,8 @@ export function PayFlow({ item, onClose, onOrders, compact }) {
     setErr(''); setStep('processing')
     try {
       const [o] = await Promise.all([createOrder('card'), sleep(900)])
-      const { error } = await supabase.rpc('pay_order', { p_order_id: o.id, p_method: 'card' })
+      const label = `${brand || 'Card'} •••• ${card.num.replace(/\s/g, '').slice(-4)}` // only a label, never the card number
+      const { error } = await supabase.rpc('pay_order', { p_order_id: o.id, p_method: 'card', p_paid_with: label })
       if (error) throw error
       await sleep(1500)
       const { data } = await supabase.from('transactions').select('release_at,paid_at').eq('id', o.id).single()
@@ -788,82 +789,8 @@ export function PayFlow({ item, onClose, onOrders, compact }) {
   )
 }
 
-/* My orders: things I bought and things I sold */
-const STATUS = {
-  held: ['In escrow', 'bg-amber-50 text-amber-800'],
-  released: ['Released to seller', 'bg-[#E4EFE8] text-[#3D5A4D]'],
-  disputed: ['Under review', 'bg-red-50 text-red-700'],
-  refunded: ['Refunded', 'bg-[#F3EEE8] text-[#6B6B62]'],
-}
-export function Orders({ me, onClose }) {
-  const [rows, setRows] = useState(null)
-  const [titles, setTitles] = useState({})
-  const [err, setErr] = useState('')
-
-  async function load() {
-    await supabase.rpc('release_due')
-    const { data, error } = await supabase.from('transactions').select('*')
-      .in('escrow_status', Object.keys(STATUS)).order('created_at', { ascending: false }).limit(50)
-    if (error) { setErr(error.message); return setRows([]) }
-    setRows(data || [])
-    const ids = [...new Set((data || []).map((r) => r.listing_id))]
-    if (ids.length) {
-      const { data: ls } = await supabase.from('listings').select('id,title').in('id', ids)
-      setTitles(Object.fromEntries((ls || []).map((l) => [l.id, l.title])))
-    }
-  }
-  useEffect(() => { load() }, [])
-
-  async function act(fn, id, ask) {
-    if (!window.confirm(ask)) return
-    setErr('')
-    const { error } = await supabase.rpc(fn, { p_order_id: id })
-    if (error) return setErr(error.message)
-    load()
-  }
-
-  return (
-    <div className="fixed inset-0 z-[60] grid place-items-center bg-black/50 p-4" onClick={onClose}>
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-[#F3EEE8] p-5" onClick={(e) => e.stopPropagation()}>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-[#17352B]">My orders</h2>
-          <button onClick={onClose} className="text-2xl leading-none text-[#6B6B62]" aria-label="Close">×</button>
-        </div>
-        {err && <p role="alert" className="mb-3 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{err}</p>}
-        {rows === null ? <p className="text-sm text-[#6B6B62]">Loading…</p> : rows.length === 0 ? (
-          <p className="text-sm text-[#6B6B62]">No orders yet.</p>
-        ) : (
-          <ul className="space-y-3">
-            {rows.map((o) => {
-              const buyer = o.buyer_id === me
-              const [label, cls] = STATUS[o.escrow_status] || [o.escrow_status, 'bg-[#F3EEE8]']
-              return (
-                <li key={o.id} className="rounded-xl border border-[#E4DED4] bg-white p-4 text-sm">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="font-semibold">{titles[o.listing_id] || 'Listing'}</p>
-                    <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${cls}`}>{label}</span>
-                  </div>
-                  <p className="mt-1 text-[#3D4A44]">{buyer ? 'You bought for' : 'You sold for'} <b>{money(o.amount)}</b> · {when(o.paid_at)}</p>
-                  <p className="mt-0.5 text-xs text-[#8A8A80]">Transaction {txnId(o.id)} · {o.method === 'qr' ? 'UPI' : 'Card'}</p>
-                  {o.escrow_status === 'held' && (
-                    <p className="mt-1 text-xs text-[#8A8A80]">{buyer ? 'Released automatically' : 'You are paid when the buyer confirms, or automatically'} on {when(o.release_at)}.</p>
-                  )}
-                  {o.escrow_status === 'disputed' && <p className="mt-1 text-xs text-[#8A8A80]">A moderator is reviewing this order. The payment stays held until they decide.</p>}
-                  {buyer && o.escrow_status === 'held' && (
-                    <div className="mt-3 flex gap-2">
-                      <button onClick={() => act('release_order', o.id, 'Release the payment to the seller? Only do this once you have received the item.')} className={btn}>I received it, release</button>
-                      <button onClick={() => act('dispute_order', o.id, 'Report a problem? The payment will stay held until a moderator decides.')} className={ghost}>Report a problem</button>
-                    </div>
-                  )}
-                </li>
-              )
-            })}
-          </ul>
-        )}
-      </div>
-    </div>
-  )
-}
+/* My orders (Purchases and Sales) now lives in Orders.jsx */
+export { Orders } from './Orders'
 
 /* Phone side of the QR flow. Opened from the QR code, no login needed. Looks like a UPI payment screen. */
 export function PhonePay({ orderId, token }) {

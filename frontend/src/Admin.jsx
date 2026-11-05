@@ -219,6 +219,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
 import SignedFile from './Signedfile'
 import { DisputeList } from './Disputes'
+import AdminPayments from './AdminPayments'
 
 const money = (n) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n)
 const inp = 'w-full rounded-lg border border-[#E4DED4] bg-[#FDFBF6] px-3 py-2.5 text-sm text-[#17352B] focus:border-[#256B4F] focus:outline-none focus:ring-2 focus:ring-[#256B4F]/25'
@@ -368,7 +369,7 @@ export default function Admin({ session, onBack }) {
       setSellers(Object.fromEntries((ps || []).map((p) => [p.id, p])))
     }
   }
-  useEffect(() => { if (tab !== 'disputes') load() }, [tab])
+  useEffect(() => { if (tab !== 'disputes' && tab !== 'payments') load() }, [tab])
 
   async function takeDown(l) {
     const reason = window.prompt('Reason for taking this listing down (shown to the seller):')
@@ -380,11 +381,11 @@ export default function Admin({ session, onBack }) {
 
   return (
     <div className="min-h-screen bg-[#F3EEE8] px-4 py-8 font-[Inter,system-ui,sans-serif] text-[#17352B]">
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-5xl">
         <button onClick={onBack} className="mb-5 text-xs font-semibold text-[#256B4F] hover:underline">← Back to marketplace</button>
         <h1 className="text-2xl font-bold">Moderator review</h1>
         <div className="mt-4 flex gap-2">
-          {[['pending', 'Pending'], ['reviewed', 'Reviewed'], ['disputes', 'Disputes']].map(([k, l]) => (
+          {[['pending', 'Pending'], ['reviewed', 'Reviewed'], ['payments', 'Payments'], ['disputes', 'Disputes']].map(([k, l]) => (
             <button key={k} onClick={() => { setErr(''); setTab(k) }}
               className={`rounded-full px-4 py-1.5 text-sm font-medium ${tab === k ? 'bg-[#17352B] text-white' : 'bg-white text-[#3D4A44] hover:bg-[#E9E2D6]'}`}>{l}</button>
           ))}
@@ -392,7 +393,8 @@ export default function Admin({ session, onBack }) {
         {err && <p role="alert" className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{err} (If this says &quot;Not allowed&quot;, your account is not in the admins table yet.)</p>}
 
         <div className="mt-5">
-          {tab === 'disputes' ? <DisputeList me={me} admin />
+          {tab === 'payments' ? <AdminPayments />
+          : tab === 'disputes' ? <DisputeList me={me} admin />
           : rows === null ? <p className="text-sm text-[#6B6B62]">{err ? '' : 'Loading…'}</p>
           : rows.length === 0 ? <p className="text-sm text-[#6B6B62]">{tab === 'pending' ? 'Nothing waiting for review.' : 'No reviewed listings yet.'}</p>
           : tab === 'pending' ? (
